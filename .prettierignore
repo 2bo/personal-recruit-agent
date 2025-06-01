@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.mastra/
+package-lock.json
+*.log
+.gitignore
+.env*
+*.db
+*.db-*
