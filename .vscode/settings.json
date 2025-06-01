@@ -18,5 +18,5 @@
   "[json]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "cSpell.words": ["mastra"]
+  "cSpell.words": ["lapras", "mastra"]
 }
