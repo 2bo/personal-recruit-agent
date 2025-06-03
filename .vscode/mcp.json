@@ -7,6 +7,10 @@
     },
     "deepwiki": {
       "url": "https://mcp.deepwiki.com/sse"
+    },
+    "lapras": {
+      "command": "npx",
+      "args": ["-y", "@lapras-inc/lapras-mcp-server"]
     }
   }
 }
