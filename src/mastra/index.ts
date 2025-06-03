@@ -1,6 +1,7 @@
 import { Mastra } from '@mastra/core';
 import { LibSQLStore } from '@mastra/libsql';
 import { RecruitAgent } from './agents/recruit-agent';
+import { ChecklistAgent } from './agents/checklist-agent';
 
 // ストレージインスタンスを作成
 const storage = new LibSQLStore({
@@ -10,5 +11,5 @@ const storage = new LibSQLStore({
 
 export const mastra = new Mastra({
   storage,
-  agents: { RecruitAgent },
+  agents: { RecruitAgent, ChecklistAgent },
 });
