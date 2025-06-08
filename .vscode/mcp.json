@@ -11,6 +11,10 @@
     "lapras": {
       "command": "npx",
       "args": ["-y", "@lapras-inc/lapras-mcp-server"]
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["@playwright/mcp@latest"]
     }
   }
 }
