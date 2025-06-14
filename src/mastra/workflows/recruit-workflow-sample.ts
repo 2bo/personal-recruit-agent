@@ -1,7 +1,7 @@
 import { createWorkflow, createStep } from '@mastra/core/workflows';
 import { z } from 'zod';
 import { ChecklistAgent } from '../agents/checklist-agent';
-import { RecruitAgent } from '../agents/recruit-agent';
+import { JobSearchAgent } from '../agents/job-search-agent';
 import { JobMatcherAgent } from '../agents/job-matcher-agent';
 
 // ワークフロー設定（外部から変更可能）
@@ -156,7 +156,7 @@ const recruitStep = createStep({
     }),
   }),
   execute: async ({ inputData }) => {
-    const result = await RecruitAgent.generate(inputData.prompt, {
+    const result = await JobSearchAgent.generate(inputData.prompt, {
       experimental_output: recruitOutputSchema,
       maxSteps: 5,
     });

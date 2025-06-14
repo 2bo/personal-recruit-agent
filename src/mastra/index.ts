@@ -1,7 +1,7 @@
 import { Mastra } from '@mastra/core';
 import { LibSQLStore } from '@mastra/libsql';
 import { PinoLogger } from '@mastra/loggers';
-import { RecruitAgent } from './agents/recruit-agent';
+import { JobSearchAgent } from './agents/job-search-agent';
 import { ChecklistAgent } from './agents/checklist-agent';
 import { JobMatcherAgent } from './agents/job-matcher-agent';
 import { recruitWorkflowSample } from './workflows/recruit-workflow-sample';
@@ -21,6 +21,6 @@ const logger = new PinoLogger({
 export const mastra = new Mastra({
   storage,
   logger,
-  agents: { RecruitAgent, ChecklistAgent, JobMatcherAgent },
+  agents: { JobSearchAgent, ChecklistAgent, JobMatcherAgent },
   workflows: { recruitWorkflowSample },
 });

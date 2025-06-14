@@ -5,8 +5,8 @@ import { LaprasMCP } from '../mcp-client/lapras-mcp';
 import { getCurrentModel } from '../config/model-config';
 
 // 採用エージェントの作成
-export const RecruitAgent = new Agent({
-  name: 'RecruitAgent',
+export const JobSearchAgent = new Agent({
+  name: 'JobSearchAgent',
   // NOTE:
   // https://github.com/lapras-inc/lapras-mcp-server/blob/main/src/tools/searchJobs.ts
   instructions: `あなたは経験豊富なエンジニア専門のリクルーターです。ユーザーの要望に基づいて最適な案件を見つけることが使命です。
