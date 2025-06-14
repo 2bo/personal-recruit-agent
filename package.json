@@ -10,8 +10,7 @@
     "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "prepare": "husky",
-    "workflow:example": "tsx src/mastra/workflows/example.ts"
+    "prepare": "husky"
   },
   "keywords": [],
   "author": "",
