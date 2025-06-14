@@ -34,6 +34,7 @@
 
 - ストレージにLibSQL（ファイルデータベース）を使用した中央設定
 - 3つのメインエージェントが登録されています：RecruitAgent、ChecklistAgent、JobMatcherAgent
+- 統合ワークフロー：`recruitWorkflow` - 3つのエージェントを連携させる自動化フロー
 - 開発にはインメモリデータベースを使用
 
 **エージェントシステム**:
@@ -41,6 +42,14 @@
 - **RecruitAgent** (`src/mastra/agents/recruit-agent.ts`): 積極的な検索戦略を持つ求人検索スペシャリスト、マルチフェーズ検索を通じて10件以上の求人を見つけることを目標とする
 - **ChecklistAgent** (`src/mastra/agents/checklist-agent.ts`): ユーザー要件を構造化されたMarkdownチェックリストに変換
 - **JobMatcherAgent** (`src/mastra/agents/job-matcher-agent.ts`): 詳細なスコアリングアルゴリズムを使用して求人適合性を分析（推奨には80%以上の閾値）
+
+**統合ワークフローシステム** (`src/mastra/workflows/recruit-workflow.ts`):
+
+- **統合求人マッチングワークフロー**: 3つのエージェントを自動連携させる統合フロー
+- **並列処理**: 最大10件の求人を同時分析（エラー耐性付き）
+- **重複削除**: 検索結果の重複求人を自動除去
+- **自動フィルタリング**: 80%以上のマッチング率のみを推奨として抽出
+- **結果ソート**: マッチング率降順で結果を整理
 
 **外部統合**:
 
@@ -57,10 +66,21 @@
 
 **JobMatcherAgent評価**:
 
-- 重み付けスコアリングシステム：技術スタック（30%）、働き方（25%）、給与（20%）、会社（15%）、その他（10%）
+重み付けスコアリングシステム：技術スタック（30%）、働き方（25%）、給与（20%）、会社（15%）、その他（10%）
+
 - ユーザーチェックリストで明示的に言及された条件のみを評価
 - 不足している条件は負のスコアではなく「制約なし」として扱う
 - 肯定的な推奨には80%以上のマッチ率が必要
+
+**統合ワークフロー実行フロー**:
+
+1. **ChecklistAgent**: ユーザーの自由文要望をMarkdownチェックリストに変換
+2. **RecruitAgent**: チェックリストを元に積極的な求人検索（10件以上目標）
+3. **重複削除**: job_description_idベースで重複求人を自動除去
+4. **JobMatcherAgent**: 最大10件並列でマッチング分析（エラー時は該当案件をスキップして継続）
+5. **フィルタリング**: 80%以上のマッチング率の求人のみを抽出
+6. **ソート**: マッチング率降順で結果を整理
+7. **結果出力**: 実行統計、推奨求人一覧、生成チェックリストを含む統合レポート
 
 ### メモリと状態管理
 
@@ -74,7 +94,7 @@
 ### 技術スタック
 
 - **ランタイム**: Node.js 20.9.0+、ES2022モジュール
-- **AIモデル**: Google Gemini（2.0-flash-exp、2.5-flash-preview）
+- **AIモデル**: 切り替え可能（Gemini: 2.0-flash-exp、2.5-flash-preview | OpenAI: GPT-4.1-mini、GPT-4o-mini、GPT-4o）
 - **フレームワーク**: MCP統合を持つMastra AIフレームワーク
 - **ストレージ**: エージェントメモリ用LibSQL（SQLite互換）
 - **コード品質**: Huskyプレコミットフックを持つESLint + Prettier
@@ -86,6 +106,80 @@
 - ローカルに作成されるデータベースファイル：`database.db`と`mastra.db`
 - すべてのエージェント指示は日本語で、日本の求人市場をターゲット
 - LAPRAS統合により日本のエンジニア求人リストへのアクセスを提供
+
+## ロギング設定
+
+### PinoLogger設定
+
+PinoLoggerが設定されており、アプリケーションの動作状況をログで確認できます：
+
+```typescript
+// src/mastra/index.ts
+import { PinoLogger } from '@mastra/loggers';
+
+const logger = new PinoLogger({
+  name: 'PersonalRecruitAgent',
+  level: 'info',
+});
+```
+
+### ログレベル
+
+- `trace` (10) - 最も詳細なデバッグ情報
+- `debug` (20) - デバッグ情報
+- `info` (30) - 一般的な情報（デフォルト）
+- `warn` (40) - 警告
+- `error` (50) - エラー
+- `fatal` (60) - 致命的エラー
+
+## AIモデル設定と切り替え
+
+### 現在のモデル設定
+
+現在の設定では、全エージェントのモデルを一括で切り替え可能です。設定は `src/mastra/config/model-config.ts` で管理されています。
+
+### 切り替え方法
+
+**Gemini から GPT-4.1-mini に切り替え:**
+
+```typescript
+// src/mastra/config/model-config.ts
+export const MODEL_CONFIG = {
+  provider: 'openai' as ModelProvider, // 'gemini' → 'openai'
+  // 以下省略
+};
+```
+
+**GPT-4.1-mini から Gemini に戻す:**
+
+```typescript
+// src/mastra/config/model-config.ts
+export const MODEL_CONFIG = {
+  provider: 'gemini' as ModelProvider, // 'openai' → 'gemini'
+  // 以下省略
+};
+```
+
+### 必要な環境変数
+
+**Gemini使用時:**
+
+```bash
+export GOOGLE_GENERATIVE_AI_API_KEY="your-api-key"
+```
+
+**OpenAI使用時:**
+
+```bash
+export OPENAI_API_KEY="your-api-key"
+```
+
+### 利用可能なモデル
+
+- **Gemini**: `gemini-2.0-flash-exp` (デフォルト), `gemini-2.5-flash-preview`
+- **OpenAI**: `gpt-4.1-mini` (デフォルト), `gpt-4o-mini`, `gpt-4o`
+
+詳細な切り替え手順は `src/mastra/config/README.md` を参照してください。
 
 ## MCP サーバー利用指針
 
