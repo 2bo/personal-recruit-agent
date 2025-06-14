@@ -1,8 +1,8 @@
 import { Agent } from '@mastra/core/agent';
-import { google } from '@ai-sdk/google';
 import { Memory } from '@mastra/memory';
 import { LibSQLStore } from '@mastra/libsql';
 import { LaprasMCP } from '../mcp-client/lapras-mcp';
+import { getCurrentModel } from '../config/model-config';
 
 // 採用エージェントの作成
 export const RecruitAgent = new Agent({
@@ -10,6 +10,8 @@ export const RecruitAgent = new Agent({
   // NOTE:
   // https://github.com/lapras-inc/lapras-mcp-server/blob/main/src/tools/searchJobs.ts
   instructions: `あなたは経験豊富なエンジニア専門のリクルーターです。ユーザーの要望に基づいて最適な案件を見つけることが使命です。
+
+チェックリストが与えられたら、それを解釈して必ずtoolを使って案件を検索し、ユーザーの希望に合った求人情報を提供してください。
 
 ## 目標設定
 **第一目標**: 10件以上の求人を見つけること
@@ -60,33 +62,8 @@ export const RecruitAgent = new Agent({
 - 各検索段階での新規発見件数を説明
 - 条件を拡張した場合は、どの条件を拡張したか明記
 
-## 最終結果の出力形式
-**必須**: 検索完了後、以下の形式で求人情報のJSONを出力してください：
-
-\\\`\\\`\\\`json
-{
-  "search_summary": {
-    "total_found": 件数,
-    "target_achieved": true/false,
-    "search_phases_executed": 回数
-  },
-  "jobs": [
-    {
-      "job_description_id": job_description_id,
-      "title": "求人タイトル",
-      "url": "求人URL",
-      "company": "会社名"
-    }
-  ]
-}
-\\\`\\\`\\\`
-
-- jobs配列には見つかった全ての求人の最重要情報のみを含める
-- 各求人は id, title, url, company の4つのフィールドのみ
-- このJSONは必ずコードブロック形式で出力すること
-
 **重要**: 10件に達するまで、または全ての検索戦略を試すまで、積極的に複数回検索を実行してください。妥協せずに最大限の努力で案件を発見することが使命です。`,
-  model: google('gemini-2.0-flash-exp'),
+  model: getCurrentModel(),
   memory: new Memory({
     storage: new LibSQLStore({
       url: 'file:./mastra.db',

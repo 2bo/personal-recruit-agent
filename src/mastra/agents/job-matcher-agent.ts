@@ -1,8 +1,8 @@
 import { Agent } from '@mastra/core/agent';
-import { google } from '@ai-sdk/google';
 import { Memory } from '@mastra/memory';
 import { LibSQLStore } from '@mastra/libsql';
 import { LaprasMCP } from '../mcp-client/lapras-mcp';
+import { getCurrentModel } from '../config/model-config';
 
 // 求職条件のチェックリスト型定義（フリーテキスト対応）
 export interface JobCriteria {
@@ -131,69 +131,10 @@ export const JobMatcherAgent = new Agent({
 - ほとんど満たさない（わずかな条件のみ100%）：20%
 - 全く満たさない（全条件0%）：0%
 
-## 80%以上の場合の出力形式
-**必須**: 以下のJSON形式で結果を出力してください：
-
-\\\`\\\`\\\`json
-{
-  "match_result": {
-    "overall_match_rate": 適合率（%）,
-    "is_recommended": true,
-    "job_title": "案件タイトル",
-    "company_name": "会社名",
-    "job_content_summary": "求人内容のサマリ（200-300文字）。プロダクトの特徴・事業内容、具体的な業務内容（開発・設計・運用など）、技術環境や開発体制、事業の成長性や将来性、職場環境や企業文化の特色など、この求人の魅力的な特徴を求職者が具体的にイメージできるよう詳細に説明してください。",
-    "extracted_criteria": {
-      "salary_requirements": "チェックリストから抽出した年収条件（記載なしの場合は制約なし）",
-      "tech_stack_requirements": "チェックリストから抽出した技術要件（記載なしの場合は制約なし）",
-      "work_style_requirements": "チェックリストから抽出した働き方要件（記載なしの場合は制約なし）",
-      "company_requirements": "チェックリストから抽出した企業要件（記載なしの場合は制約なし）",
-      "other_requirements": "チェックリストから抽出したその他要件（記載なしの場合は制約なし）"
-    },
-    "evaluation_scope": {
-      "evaluated_categories": ["実際に評価対象となったカテゴリ一覧"],
-      "excluded_categories": ["記載不足により評価対象外となったカテゴリ一覧"],
-      "weight_redistribution": "重み再配分の詳細説明"
-    },
-    "match_details": {
-      "salary": {
-        "rate": "適合率（上記基準に基づく数値）",
-        "calculation_basis": "計算根拠（希望○○万円に対し、案件○○万円のため○○%）",
-        "details": "給与条件の詳細説明"
-      },
-      "tech_stack": {
-        "rate": "適合率（上記基準に基づく数値）",
-        "calculation_basis": "計算根拠（必須技術○○のうち○○が一致のため○○%）",
-        "details": "技術スタックの詳細説明"
-      },
-      "work_style": {
-        "rate": "適合率（上記基準に基づく数値）",
-        "calculation_basis": "計算根拠（働き方条件の一致度による）",
-        "details": "働き方の詳細説明"
-      },
-      "company": {
-        "rate": "適合率（上記基準に基づく数値）",
-        "calculation_basis": "計算根拠（企業条件の一致度による）",
-        "details": "企業・事業の詳細説明"
-      },
-      "others": {
-        "rate": "適合率（上記基準に基づく数値）",
-        "calculation_basis": "計算根拠（複数条件がある場合は各条件の個別評価結果を明記：条件1：○○のため○○%、条件2：○○のため○○%、組み合わせ評価：○○%）",
-        "details": "その他条件の詳細説明（複数条件がある場合は個別評価結果も含める）"
-      }
-    },
-    "strengths": [
-      "特に優れている点1",
-      "特に優れている点2",
-      "特に優れている点3"
-    ],
-    "considerations": [
-      "注意すべき点1（もしあれば）",
-      "注意すべき点2（もしあれば）"
-    ],
-    "recommendation_reason": "なぜこの案件を推薦するのかの総合的な理由（200-300文字）。求人の具体的な魅力（技術環境、成長機会、企業文化、プロダクトの特徴、キャリアパス、働き方の良さなど）と、求職者の条件とのマッチポイントを組み合わせて、この案件が求職者にとって価値ある選択肢である理由を詳細に説明してください。"
-  }
-}
-\\\`\\\`\\\`
+## 分析結果の出力
+- Structured outputを使用して、分析結果を構造化データで出力
+- 80%以上の場合は詳細な推薦理由を含める
+- 80%未満の場合は不適合の理由を説明
 
 ## 80%未満の場合
 - 簡潔に不適合の理由を説明
@@ -247,7 +188,7 @@ export const JobMatcherAgent = new Agent({
 - **複数条件は必ず個別評価してから組み合わせ評価**を実施
 
 **重要**: 正確性を最優先とし、楽観的すぎる判定は避けてください。求職者にとって本当に良い案件のみを推薦することが重要です。`,
-  model: google('gemini-2.0-flash-exp'),
+  model: getCurrentModel(),
   memory: new Memory({
     storage: new LibSQLStore({
       url: 'file:./mastra.db',

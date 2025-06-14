@@ -1,5 +1,5 @@
 import { Agent } from '@mastra/core/agent';
-import { google } from '@ai-sdk/google';
+import { getCurrentModel } from '../config/model-config';
 
 // 求人条件チェックリスト作成エージェント
 export const ChecklistAgent = new Agent({
@@ -62,5 +62,5 @@ export const ChecklistAgent = new Agent({
 - 固定テンプレートに無理に当てはめず、必要に応じて項目を追加・調整する
 
 必ずMarkdownコードブロック内でチェックリストを出力してください。`,
-  model: google('gemini-2.5-flash-preview-05-20'),
+  model: getCurrentModel(),
 });
