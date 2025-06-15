@@ -3,50 +3,29 @@ import { openai } from '@ai-sdk/openai';
 
 // モデル設定タイプ
 export type ModelProvider = 'gemini' | 'openai';
-export type ModelName =
-  | 'gemini-2.0-flash-exp'
-  | 'gemini-2.5-flash-preview'
-  | 'gpt-4o-mini'
-  | 'gpt-4o'
-  | 'gpt-4.1-mini';
 
-// 現在のモデル設定（ここを変更するだけで全エージェントのモデルが切り替わります）
-export const MODEL_CONFIG = {
-  // 'gemini' または 'openai' に切り替え
+// デフォルト設定
+const DEFAULT_CONFIG = {
   provider: 'openai' as ModelProvider,
-
-  // 各プロバイダーのデフォルトモデル
   models: {
-    gemini: 'gemini-2.0-flash-exp' as const,
-    openai: 'gpt-4.1-mini' as const,
+    gemini: 'gemini-2.5-flash-preview-05-20',
+    openai: 'gpt-4o-mini',
   },
 } as const;
 
+// 環境変数から設定を取得
+const getModelConfig = () => {
+  const provider = (process.env.MODEL_PROVIDER ??
+    DEFAULT_CONFIG.provider) as ModelProvider;
+  const modelName = process.env.MODEL_NAME ?? DEFAULT_CONFIG.models[provider];
+
+  return { provider, modelName };
+};
+
 // モデルインスタンスを取得する関数
-export function getCurrentModel() {
-  const { provider, models } = MODEL_CONFIG;
+export const getCurrentModel = () => {
+  const { provider, modelName } = getModelConfig();
 
-  switch (provider) {
-    case 'gemini':
-      return google(models.gemini);
-    case 'openai':
-      return openai(models.openai);
-    default:
-      throw new Error(`Unknown model provider: ${String(provider)}`);
-  }
-}
-
-// 利用可能なモデルの一覧
-export const AVAILABLE_MODELS = {
-  gemini: ['gemini-2.0-flash-exp', 'gemini-2.5-flash-preview'] as const,
-  openai: ['gpt-4o-mini', 'gpt-4o', 'gpt-4.1-mini'] as const,
-} as const;
-
-// モデルを動的に変更する関数（開発・テスト用）
-export function createModelInstance(
-  provider: ModelProvider,
-  modelName: string
-) {
   switch (provider) {
     case 'gemini':
       return google(modelName);
@@ -55,34 +34,4 @@ export function createModelInstance(
     default:
       throw new Error(`Unknown model provider: ${String(provider)}`);
   }
-}
-
-// 環境変数のチェック
-export function checkModelEnvironment() {
-  const { provider } = MODEL_CONFIG;
-
-  switch (provider) {
-    case 'gemini':
-      if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
-        console.warn('Warning: GOOGLE_GENERATIVE_AI_API_KEY is not set');
-      }
-      break;
-    case 'openai':
-      if (!process.env.OPENAI_API_KEY) {
-        console.warn('Warning: OPENAI_API_KEY is not set');
-      }
-      break;
-  }
-}
-
-// 現在の設定を表示
-export function getCurrentModelInfo() {
-  const { provider, models } = MODEL_CONFIG;
-  const currentModel = models[provider];
-
-  return {
-    provider,
-    model: currentModel,
-    description: `${provider.toUpperCase()}: ${currentModel}`,
-  };
-}
+};
