@@ -9,7 +9,7 @@ const DEFAULT_CONFIG = {
   provider: 'openai' as ModelProvider,
   models: {
     gemini: 'gemini-2.5-flash-preview-05-20',
-    openai: 'gpt-4o-mini',
+    openai: 'gpt-4.1-mini',
   },
 } as const;
 
