@@ -19,6 +19,12 @@
 - `npm run lint:fix` - ESLintの問題を自動修正
 - `npm run format` - Prettierでコードをフォーマット
 - `npm run format:check` - コードフォーマットをチェック
+- `npx tsc --noEmit` - TypeScript型チェック
+
+**重要**: コード変更後は必ず以下を実行してエラーがないことを確認する：
+
+1. `npm run lint` - ESLintチェック
+2. `npx tsc --noEmit` - TypeScript型チェック
 
 ### テスト
 
@@ -106,6 +112,18 @@
 - ローカルに作成されるデータベースファイル：`database.db`と`mastra.db`
 - すべてのエージェント指示は日本語で、日本の求人市場をターゲット
 - LAPRAS統合により日本のエンジニア求人リストへのアクセスを提供
+
+## コーディング規約
+
+- **関数定義**: 必ずアロー関数を使用する（`function` 宣言は使用しない）
+
+  ```typescript
+  // ✅ 正しい
+  const myFunction = () => {};
+
+  // ❌ 避ける
+  function myFunction() {}
+  ```
 
 ## ロギング設定
 
