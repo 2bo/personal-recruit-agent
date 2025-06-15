@@ -5,6 +5,7 @@ import { JobSearchAgent } from './agents/job-search-agent';
 import { ChecklistAgent } from './agents/checklist-agent';
 import { JobMatcherAgent } from './agents/job-matcher-agent';
 import { recruitWorkflowSample } from './workflows/recruit-workflow-sample';
+import { recruitWorkflow } from './workflows/recruit-workflow';
 
 // ストレージインスタンスを作成
 const storage = new LibSQLStore({
@@ -22,5 +23,5 @@ export const mastra = new Mastra({
   storage,
   logger,
   agents: { JobSearchAgent, ChecklistAgent, JobMatcherAgent },
-  workflows: { recruitWorkflowSample },
+  workflows: { recruitWorkflowSample, recruitWorkflow },
 });
