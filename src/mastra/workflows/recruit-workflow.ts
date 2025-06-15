@@ -32,7 +32,7 @@ const jobSearchStep = createStep({
   execute: async ({ inputData }) => {
     const result = await JobSearchAgent.generate(
       `以下の要件に基づいて求人を検索してください。目標は10件以上の求人を見つけることです。\n\n要件:\n${inputData.requirementsList}`,
-      { experimental_output: jobSearchResultSchema, maxSteps: 20 }
+      { experimental_output: jobSearchResultSchema, maxSteps: 5 }
     );
     // 重複した求人を除外してJob[]配列を直接返す
     const uniqueJobs = Array.from(
