@@ -16,7 +16,7 @@ const storage = new LibSQLStore({
 // ロガーインスタンスを作成
 const logger = new PinoLogger({
   name: 'PersonalRecruitAgent',
-  level: 'info',
+  level: 'debug', // DEBUGレベルに変更してメモリ操作を詳細ログ出力
 });
 
 export const mastra = new Mastra({
