@@ -53,7 +53,7 @@ export const JobMatcherAgent = new Agent({
 - 記載なし → 評価対象外（加点も減点もしない）
 
 ## 判定プロセス
-1. **案件詳細取得**: \`get_job_detail\` ツールで詳細情報を取得
+1. **案件詳細取得**: get_job_detail ツールで詳細情報を取得
 2. **チェックリスト解析**: フリーテキストから記載された条件を抽出
 3. **記載条件での評価**: 記載された条件のみで適合性を判定
 4. **条件別チェック**: 以下の観点で詳細に照合
@@ -133,6 +133,11 @@ export const JobMatcherAgent = new Agent({
 
 ## 分析結果の出力
 - Structured outputを使用して、分析結果を構造化データで出力
+- **必須**: get_job_detailツールで取得した求人詳細から以下の情報を必ず抽出して出力に含める：
+  - companyName: 会社名（company.nameフィールドから取得）
+  - salaryMin: 最低給与（salary_minフィールドから取得）
+  - salaryMax: 最高給与（salary_maxフィールドから取得）
+  - positionName: 職種（position_nameフィールドから取得）
 - 80%以上の場合は詳細な推薦理由を含める
 - 80%未満の場合は不適合の理由を説明
 

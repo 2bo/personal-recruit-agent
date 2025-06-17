@@ -62,8 +62,10 @@ export const formatJobResultText = (matchingResults: MatchResult[]): string => {
     const rankEmoji = getRankEmoji(index);
     const scoreEmoji = getScoreEmoji(result.matchingScore);
 
-    return `${rankEmoji} 【${result.matchingScore.toString()}%マッチ】${result.title}
+    return `${rankEmoji} 【${result.matchingScore.toString()}%マッチ】${result.title} | ${String(result.companyName)}
 💼 求人ID: ${result.job_description_id}
+👔 職種: ${String(result.positionName)}
+💰 年収: ${formatSalaryRange(Number(result.salaryMin), Number(result.salaryMax))}
 ${scoreEmoji} マッチ率: ${result.matchingScore.toString()}%
 📝 マッチ理由: ${result.matchingReason}
 👀 詳細: ${result.url || '詳細URLなし'}`;
@@ -121,7 +123,7 @@ export const formatJobResultBlocks = (
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: `${rankEmoji} *【${result.matchingScore.toString()}%マッチ】${result.title}*\n💼 求人ID: ${result.job_description_id}\n${scoreEmoji} マッチ率: ${result.matchingScore.toString()}%`,
+        text: `${rankEmoji} *【${result.matchingScore.toString()}%マッチ】${result.title} | ${String(result.companyName)}*\n💼 求人ID: ${result.job_description_id}\n👔 職種: ${String(result.positionName)}\n💰 年収: ${formatSalaryRange(Number(result.salaryMin), Number(result.salaryMax))}\n${scoreEmoji} マッチ率: ${result.matchingScore.toString()}%`,
       },
     };
     blocks.push(jobInfoSection);
@@ -207,4 +209,29 @@ const getScoreEmoji = (score: number): string => {
   if (score >= 90) return '⭐';
   if (score >= 85) return '✅';
   return '👍';
+};
+
+/**
+ * 給与レンジをフォーマット
+ */
+const formatSalaryRange = (salaryMin: number, salaryMax: number): string => {
+  if (salaryMin === 0 && salaryMax === 0) {
+    return '非公開';
+  }
+
+  const formatAmount = (amount: number): string => {
+    if (amount >= 10000000) {
+      return `${(amount / 10000000).toFixed(0)}千万円`;
+    } else if (amount >= 1000000) {
+      return `${Math.round(amount / 10000).toString()}万円`;
+    } else {
+      return `${amount.toLocaleString()}円`;
+    }
+  };
+
+  if (salaryMin === salaryMax) {
+    return formatAmount(salaryMin);
+  }
+
+  return `${formatAmount(salaryMin)}〜${formatAmount(salaryMax)}`;
 };

@@ -82,8 +82,12 @@ const jobMatchingStep = createStep({
         job_description_id: inputData.job_description_id,
         title: inputData.title,
         url: '',
+        companyName: '',
+        salaryMin: 0,
+        salaryMax: 0,
+        positionName: '',
         matchingScore: 0,
-        matchingReason: 'エラーにより分析できませんでした',
+        matchingReason: '',
         success: false,
       };
     }
