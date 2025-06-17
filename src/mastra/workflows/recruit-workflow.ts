@@ -1,5 +1,6 @@
 import { createWorkflow, createStep } from '@mastra/core';
 import { z } from 'zod';
+import { randomUUID } from 'crypto';
 import { ChecklistAgent } from '../agents/checklist-agent';
 import { JobSearchAgent } from '../agents/job-search-agent';
 import { JobMatcherAgent } from '../agents/job-matcher-agent';
@@ -7,15 +8,32 @@ import { sendSlackNotification } from '../utils/slack-sender';
 import { formatJobResultsForSlack } from '../formatters/job-slack-formatter';
 import { matchResultSchema } from '../types/recruitment';
 
+// ワークフロー全体で共有するセッションID
+const workflowSessionIds = {
+  resourceId: 'anonymous-job-seeker',
+  threadId: randomUUID(),
+};
+
 const checklistStep = createStep({
   id: 'create-checklist',
-  inputSchema: z.object({ userRequirements: z.string() }),
-  outputSchema: z.object({ requirementsList: z.string() }),
+  inputSchema: z.object({
+    userRequirements: z.string(),
+  }),
+  outputSchema: z.object({
+    requirementsList: z.string(),
+  }),
   execute: async ({ inputData, mastra }) => {
-    const result = await ChecklistAgent.generate(inputData.userRequirements);
+    const result = await ChecklistAgent.generate(
+      inputData.userRequirements,
+      workflowSessionIds
+    );
     const logger = mastra.getLogger();
     logger.info('チェックリスト生成結果:', result.text);
-    return { requirementsList: result.text };
+    logger.debug('セッションID:', workflowSessionIds);
+
+    return {
+      requirementsList: result.text,
+    };
   },
 });
 
@@ -32,21 +50,29 @@ const jobSearchResultSchema = z.object({
 
 const jobSearchStep = createStep({
   id: 'search-jobs',
-  inputSchema: z.object({ requirementsList: z.string() }),
+  inputSchema: z.object({
+    requirementsList: z.string(),
+  }),
   outputSchema: z.array(jobSchema), // Job[]を直接返す
   execute: async ({ inputData, mastra }) => {
     const result = await JobSearchAgent.generate(
-      `以下の要件に基づいて求人を検索してください。目標は10件以上の求人を見つけることです。\n\n要件:\n${inputData.requirementsList}`,
-      { experimental_output: jobSearchResultSchema, maxSteps: 5 }
+      `以下のチェックリストに基づいて求人を検索してください。
+
+${inputData.requirementsList}`,
+      {
+        experimental_output: jobSearchResultSchema,
+        maxSteps: 10,
+        ...workflowSessionIds,
+      }
     );
     // 重複した求人を除外してJob[]配列を直接返す
+    const jobs = result.object.jobs;
     const uniqueJobs = Array.from(
-      new Map(
-        result.object.jobs.map(job => [job.job_description_id, job])
-      ).values()
+      new Map(jobs.map(job => [job.job_description_id, job])).values()
     );
     const logger = mastra.getLogger();
     logger.info('求人検索結果:', uniqueJobs);
+
     return uniqueJobs;
   },
 });
@@ -63,7 +89,14 @@ const jobMatchingStep = createStep({
 
     try {
       const result = await JobMatcherAgent.generate(
-        `以下の求人要件と求人の適合度を分析してください。\n\n求人要件:\n${requirementsList}\n\n求人情報:\n- 求人ID: ${inputData.job_description_id}`,
+        `以下のチェックリストと求人の適合度を分析してください。
+
+## チェックリスト:
+${requirementsList}
+
+## 分析対象求人:
+- 求人ID: ${inputData.job_description_id}
+- タイトル: ${inputData.title}`,
         { experimental_output: matchResultSchema.omit({ success: true }) }
       );
 
