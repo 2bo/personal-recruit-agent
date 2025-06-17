@@ -3,6 +3,9 @@ import { z } from 'zod';
 import { ChecklistAgent } from '../agents/checklist-agent';
 import { JobSearchAgent } from '../agents/job-search-agent';
 import { JobMatcherAgent } from '../agents/job-matcher-agent';
+import { sendSlackNotification } from '../utils/slack-sender';
+import { formatJobResultsForSlack } from '../formatters/job-slack-formatter';
+import { matchResultSchema } from '../types/recruitment';
 
 const checklistStep = createStep({
   id: 'create-checklist',
@@ -46,15 +49,6 @@ const jobSearchStep = createStep({
     logger.info('求人検索結果:', uniqueJobs);
     return uniqueJobs;
   },
-});
-
-const matchResultSchema = z.object({
-  job_description_id: z.string(),
-  title: z.string(),
-  url: z.string().describe('求人のURL'),
-  matchingScore: z.number().min(0).max(100).describe('適合率（0-100%）'),
-  matchingReason: z.string().describe('適合理由'),
-  success: z.boolean().describe('処理の成功可否'),
 });
 
 const jobMatchingStep = createStep({
@@ -120,23 +114,85 @@ export const filterMatchingResults = createStep({
   },
 });
 
+const slackNotificationStep = createStep({
+  id: 'slack-notification',
+  inputSchema: z.array(matchResultSchema),
+  outputSchema: z.object({
+    notified: z.boolean(),
+    message: z.string(),
+    resultCount: z.number(),
+  }),
+  execute: async ({ inputData, mastra }) => {
+    const logger = mastra.getLogger();
+
+    // 結果が空の場合は通知しない
+    if (inputData.length === 0) {
+      logger.info('マッチング結果が空のため、Slack通知をスキップしました');
+      return {
+        notified: false,
+        message: 'No results to notify',
+        resultCount: 0,
+      };
+    }
+
+    try {
+      // 求人結果をSlackメッセージ形式にフォーマット
+      const slackMessage = formatJobResultsForSlack(inputData, {
+        useRichFormat: true,
+      });
+
+      // フォーマット結果がnullの場合（空の結果）は既にハンドル済み
+      if (!slackMessage) {
+        logger.info('求人結果が空のため、Slack通知をスキップしました');
+        return {
+          notified: false,
+          message: 'No results to notify',
+          resultCount: 0,
+        };
+      }
+
+      // Slack通知を実行
+      const result = await sendSlackNotification(slackMessage);
+
+      logger.info('Slack通知結果:', result);
+
+      return {
+        notified: result.notificationSent,
+        message: result.message,
+        resultCount: inputData.length,
+      };
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : String(error);
+      logger.error('Slack通知でエラーが発生しました:', errorMessage);
+
+      return {
+        notified: false,
+        message: `Slack通知エラー: ${errorMessage}`,
+        resultCount: inputData.length,
+      };
+    }
+  },
+});
+
 export const recruitWorkflow = createWorkflow({
   id: 'recruit-workflow',
-  steps: [checklistStep, jobSearchStep, jobMatchingStep, filterMatchingResults],
+  steps: [
+    checklistStep,
+    jobSearchStep,
+    jobMatchingStep,
+    filterMatchingResults,
+    slackNotificationStep,
+  ],
   inputSchema: z.object({
     userRequirements: z
       .string()
       .describe('ユーザーの求人要件や希望を含むテキスト'),
   }),
   outputSchema: z.object({
-    matchingResults: z.array(
-      z.object({
-        job_description_id: z.string(),
-        title: z.string(),
-        matchingScore: z.number(),
-        analysis: z.string(),
-      })
-    ),
+    notified: z.boolean(),
+    message: z.string(),
+    resultCount: z.number(),
   }),
 });
 
@@ -145,4 +201,5 @@ recruitWorkflow
   .then(jobSearchStep)
   .foreach(jobMatchingStep, { concurrency: 5 }) // 最大5件同時並列実行
   .then(filterMatchingResults)
+  .then(slackNotificationStep)
   .commit();
