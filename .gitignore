@@ -6,3 +6,6 @@ dist
 .env
 *.db
 *.db-*
+.DS_Store
+dist.zip
+layer.zip
