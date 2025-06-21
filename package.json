@@ -11,7 +11,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky",
-    "build:lambda": "esbuild src/lambda.ts --bundle --platform=node --target=node20 --format=esm --minify --tree-shaking=true --outfile=dist/index.js && cd dist && zip ../dist.zip *"
+    "build:lambda": "mkdir -p dist && esbuild src/lambda.ts --bundle --platform=node --target=node20 --format=esm --minify --tree-shaking=true --banner:js=\"import { createRequire } from 'module'; const require = createRequire(import.meta.url);\" --outfile=dist/index.js && echo '{\"type\":\"module\"}' > dist/package.json && cd dist && zip ../dist.zip *",
+    "build:lambda-layer": "mkdir -p layer/nodejs && npm install --prefix layer/nodejs @libsql/client libsql @libsql/linux-arm64-gnu @lapras-inc/lapras-mcp-server --force && cd layer && zip -r ../layer.zip *"
   },
   "keywords": [],
   "author": "",
@@ -24,6 +25,8 @@
   "dependencies": {
     "@ai-sdk/google": "^1.2.18",
     "@ai-sdk/openai": "^1.3.22",
+    "@lapras-inc/lapras-mcp-server": "^0.4.0",
+    "@libsql/client": "^0.15.9",
     "@mastra/core": "^0.10.1",
     "@mastra/libsql": "^0.10.0",
     "@mastra/loggers": "^0.10.2",
