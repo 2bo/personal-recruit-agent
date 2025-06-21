@@ -9,3 +9,4 @@ dist
 .DS_Store
 dist.zip
 layer.zip
+layer/
