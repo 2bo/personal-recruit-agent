@@ -8,7 +8,10 @@ import { recruitWorkflow } from './workflows/recruit-workflow';
 
 // ストレージインスタンスを作成（全エージェント共通）
 const storage = new LibSQLStore({
-  url: 'file:./mastra.db',
+  url:
+    process.env.NODE_ENV === 'production'
+      ? 'file:/tmp/mastra.db'
+      : 'file:./mastra.db',
 });
 
 // ロガーインスタンスを作成
