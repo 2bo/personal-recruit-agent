@@ -4,13 +4,11 @@ import { PinoLogger } from '@mastra/loggers';
 import { JobSearchAgent } from './agents/job-search-agent';
 import { ChecklistAgent } from './agents/checklist-agent';
 import { JobMatcherAgent } from './agents/job-matcher-agent';
-import { recruitWorkflowSample } from './workflows/recruit-workflow-sample';
 import { recruitWorkflow } from './workflows/recruit-workflow';
 
-// ストレージインスタンスを作成
+// ストレージインスタンスを作成（全エージェント共通）
 const storage = new LibSQLStore({
-  // インメモリーストレージを使用（開発用）
-  url: 'file:./database.db:',
+  url: 'file:./mastra.db',
 });
 
 // ロガーインスタンスを作成
@@ -23,5 +21,5 @@ export const mastra = new Mastra({
   storage,
   logger,
   agents: { JobSearchAgent, ChecklistAgent, JobMatcherAgent },
-  workflows: { recruitWorkflowSample, recruitWorkflow },
+  workflows: { recruitWorkflow },
 });
