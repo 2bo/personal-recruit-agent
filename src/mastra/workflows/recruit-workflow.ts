@@ -23,10 +23,10 @@ const checklistStep = createStep({
     requirementsList: z.string(),
   }),
   execute: async ({ inputData, mastra }) => {
-    const result = await ChecklistAgent.generate(
-      inputData.userRequirements,
-      workflowSessionIds
-    );
+    const result = await ChecklistAgent.generate(inputData.userRequirements, {
+      threadId: workflowSessionIds.threadId,
+      resourceId: workflowSessionIds.resourceId,
+    });
     const logger = mastra.getLogger();
     logger.info('チェックリスト生成結果:', result.text);
     logger.debug('セッションID:', workflowSessionIds);
@@ -62,7 +62,8 @@ ${inputData.requirementsList}`,
       {
         experimental_output: jobSearchResultSchema,
         maxSteps: 10,
-        ...workflowSessionIds,
+        threadId: workflowSessionIds.threadId,
+        resourceId: workflowSessionIds.resourceId,
       }
     );
     // 重複した求人を除外してJob[]配列を直接返す
@@ -97,7 +98,11 @@ ${requirementsList}
 ## 分析対象求人:
 - 求人ID: ${inputData.job_description_id}
 - タイトル: ${inputData.title}`,
-        { experimental_output: matchResultSchema.omit({ success: true }) }
+        {
+          experimental_output: matchResultSchema.omit({ success: true }),
+          threadId: workflowSessionIds.threadId,
+          resourceId: workflowSessionIds.resourceId,
+        }
       );
 
       logger.info(
@@ -120,7 +125,7 @@ ${requirementsList}
         salaryMax: 0,
         positionName: '',
         matchingScore: 0,
-        matchingReason: '',
+        matchingReason: 'エラーにより分析できませんでした',
         success: false,
       };
     }
@@ -236,7 +241,7 @@ export const recruitWorkflow = createWorkflow({
 recruitWorkflow
   .then(checklistStep)
   .then(jobSearchStep)
-  .foreach(jobMatchingStep, { concurrency: 5 }) // 最大5件同時並列実行
+  .foreach(jobMatchingStep, { concurrency: 3 }) // 最大5件同時並列実行
   .then(filterMatchingResults)
   .then(slackNotificationStep)
   .commit();
