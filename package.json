@@ -10,7 +10,8 @@
     "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "prepare": "husky"
+    "prepare": "husky",
+    "build:lambda": "esbuild src/lambda.ts --bundle --platform=node --target=node20 --format=esm --minify --tree-shaking=true --outfile=dist/index.js && cd dist && zip ../dist.zip *"
   },
   "keywords": [],
   "author": "",
@@ -34,10 +35,12 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.28.0",
+    "@types/aws-lambda": "^8.10.150",
     "@types/node": "^22.15.29",
     "@types/prettier": "^2.7.3",
     "@typescript-eslint/eslint-plugin": "^8.33.0",
     "@typescript-eslint/parser": "^8.33.0",
+    "esbuild": "^0.25.5",
     "eslint": "^9.28.0",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-prettier": "^5.4.1",
