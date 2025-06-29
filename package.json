@@ -11,8 +11,10 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky",
-    "build:lambda": "mkdir -p dist && esbuild src/lambda.ts --bundle --platform=node --target=node20 --format=esm --minify --tree-shaking=true --banner:js=\"import { createRequire } from 'module'; const require = createRequire(import.meta.url);\" --outfile=dist/index.js && echo '{\"type\":\"module\"}' > dist/package.json && cd dist && zip ../dist.zip *",
-    "build:lambda-layer": "mkdir -p layer/nodejs && npm install --prefix layer/nodejs @libsql/client libsql @libsql/linux-arm64-gnu @lapras-inc/lapras-mcp-server --force && cd layer && zip -r ../layer.zip *"
+    "build:docker": "docker build -t personal-recruit-agent .",
+    "build:docker-ecr": "docker build --platform linux/arm64 --provenance=false -t personal-recruit-agent .",
+    "test:docker": "docker run --rm -p 9000:8080 personal-recruit-agent",
+    "deploy:docker": "aws ecr get-login-password --region ap-northeast-1 | docker login --username AWS --password-stdin $ECR_REGISTRY && docker tag personal-recruit-agent:latest $ECR_REGISTRY/personal-recruit-agent:latest && docker push $ECR_REGISTRY/personal-recruit-agent:latest"
   },
   "keywords": [],
   "author": "",
