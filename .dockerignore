@@ -1,0 +1,44 @@
+# Node.js
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# Development files
+*.md
+.git/
+.gitignore
+.eslintrc*
+.prettierrc*
+prettier.config.*
+eslint.config.js
+
+# Build artifacts
+dist/
+*.zip
+
+# Database files
+*.db
+*.db-*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker files
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# Development dependencies
+
+# Logs
+logs/
+*.log
+
+# Environment files
+.env*
+
+# IDE files
+.vscode/
+.idea/
