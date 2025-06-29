@@ -1,7 +1,7 @@
 import { Agent } from '@mastra/core/agent';
 import { Memory } from '@mastra/memory';
 import { LaprasMCP } from '../mcp-client/lapras-mcp';
-import { getCurrentModel } from '../config/model-config';
+import { MODELS } from '../models';
 
 // 求職条件のチェックリスト型定義（フリーテキスト対応）
 export interface JobCriteria {
@@ -271,7 +271,7 @@ export const JobMatcherAgent = new Agent({
 ワーキングメモリを活用することで、評価の一貫性と客観性を確保し、求職者にとって信頼できる案件推薦を実現してください。
 
 `,
-  model: getCurrentModel(),
+  model: MODELS.GPT_4_1_MINI,
   memory: new Memory({
     options: {
       lastMessages: 10,

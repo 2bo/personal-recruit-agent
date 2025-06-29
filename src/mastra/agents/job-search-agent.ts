@@ -1,7 +1,7 @@
 import { Agent } from '@mastra/core/agent';
 import { Memory } from '@mastra/memory';
 import { LaprasMCP } from '../mcp-client/lapras-mcp';
-import { getCurrentModel } from '../config/model-config';
+import { MODELS } from '../models';
 
 // 採用エージェントの作成
 // 求人検索用メモリインスタンス（Central Storage使用）
@@ -241,7 +241,7 @@ export const JobSearchAgent = new Agent({
 ワーキングメモリを活用することで、検索戦略の継続的改善と、ユーザーに対するより効果的な求人発見を実現してください。
 
 `,
-  model: getCurrentModel(),
+  model: MODELS.GPT_4_1_MINI,
   memory: jobSearchMemory,
   tools: await LaprasMCP.getTools(),
 });

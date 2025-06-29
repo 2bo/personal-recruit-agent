@@ -1,5 +1,5 @@
 import { Agent } from '@mastra/core/agent';
-import { getCurrentModel } from '../config/model-config';
+import { MODELS } from '../models';
 
 // 求人条件チェックリスト作成エージェント
 export const ChecklistAgent = new Agent({
@@ -94,5 +94,5 @@ export const ChecklistAgent = new Agent({
 このチェックリストは後続の処理で参照されるため、優先度の正確な判定と明確な構造化が重要です。
 
 必ずMarkdownコードブロック内でチェックリストを出力してください。`,
-  model: getCurrentModel(),
+  model: MODELS.GPT_4_1_MINI,
 });
