@@ -6,9 +6,7 @@ export const LaprasMCP = new MCPClient({
   servers: {
     lapras: {
       command: 'node',
-      args: [
-        '/opt/nodejs/node_modules/@lapras-inc/lapras-mcp-server/dist/index.js',
-      ],
+      args: ['node_modules/@lapras-inc/lapras-mcp-server/dist/index.js'],
       logger: logMessage => {
         console.log(
           `[MCP] [${logMessage.level}] ${logMessage.serverName}: ${logMessage.message}`
