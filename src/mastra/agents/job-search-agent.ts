@@ -3,8 +3,6 @@ import { Memory } from '@mastra/memory';
 import { LaprasMCP } from '../mcp-client/lapras-mcp';
 import { MODELS } from '../models';
 
-// 採用エージェントの作成
-// 求人検索用メモリインスタンス（Central Storage使用）
 const jobSearchMemory = new Memory({
   options: {
     lastMessages: 20,

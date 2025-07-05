@@ -9,7 +9,6 @@ import { sendSlackNotification } from '../utils/slack-sender';
 import { formatJobResultsForSlack } from '../formatters/job-slack-formatter';
 import { matchResultSchema } from '../types/recruitment';
 
-// ワークフロー全体で共有するセッションID
 const workflowSessionIds = {
   resourceId: 'anonymous-job-seeker',
   threadId: randomUUID(),

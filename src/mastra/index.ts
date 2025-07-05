@@ -6,15 +6,13 @@ import { ChecklistAgent } from './agents/checklist-agent';
 import { JobMatcherAgent } from './agents/job-matcher-agent';
 import { recruitWorkflow } from './workflows/recruit-workflow';
 
-// ストレージインスタンスを作成（全エージェント共通）
 const storage = new LibSQLStore({
-  url: ':memory:', // Lambdaでは常にメモリストレージを使用
+  url: ':memory:',
 });
 
-// ロガーインスタンスを作成
 const logger = new PinoLogger({
   name: 'PersonalRecruitAgent',
-  level: 'info', // DEBUGレベルに変更してメモリ操作を詳細ログ出力
+  level: 'info',
 });
 
 export const mastra = new Mastra({
