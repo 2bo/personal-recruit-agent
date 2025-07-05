@@ -36,6 +36,7 @@
     "@mastra/memory": "^0.10.1",
     "@slack/types": "^2.14.0",
     "@slack/webhook": "^7.0.5",
+    "date-fns": "^4.1.0",
     "zod": "^3.25.45"
   },
   "devDependencies": {
