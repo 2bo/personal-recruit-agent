@@ -11,6 +11,9 @@ export const matchResultSchema = z.object({
   positionName: z.string().describe('職種'),
   matchingScore: z.number().min(0).max(100).describe('適合率（0-100%）'),
   matchingReason: z.string().describe('適合理由'),
+  recommendationReason: z
+    .string()
+    .describe('プロのエージェントとしてのおすすめ理由'),
   success: z.boolean().describe('処理の成功可否'),
 });
 
