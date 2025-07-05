@@ -1,6 +1,9 @@
 # AWS Lambda Node.js 20 runtime
 FROM public.ecr.aws/lambda/nodejs:20
 
+# 日本時間を設定
+ENV TZ=Asia/Tokyo
+
 # 作業ディレクトリを設定
 WORKDIR /var/task
 
