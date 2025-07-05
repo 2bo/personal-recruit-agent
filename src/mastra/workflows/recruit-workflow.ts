@@ -1,7 +1,7 @@
 import { createWorkflow, createStep } from '@mastra/core';
 import { z } from 'zod';
 import { randomUUID } from 'crypto';
-import { subDays, fromUnixTime, isAfter } from 'date-fns';
+import { subDays, isAfter } from 'date-fns';
 import { ChecklistAgent } from '../agents/checklist-agent';
 import { JobSearchAgent } from '../agents/job-search-agent';
 import { JobMatcherAgent } from '../agents/job-matcher-agent';
@@ -89,7 +89,9 @@ const filterRecentJobsStep = createStep({
     const cutoffDate = subDays(new Date(), filterDays);
 
     const recentJobs = inputData.filter(job => {
-      const jobDate = fromUnixTime(Number(job.updated_at));
+      // ISO文字列形式の日付をDateオブジェクトに変換
+      const jobDate = new Date(job.updated_at);
+      // カットオフ日付より新しい求人のみを抽出
       return isAfter(jobDate, cutoffDate);
     });
 
@@ -149,6 +151,7 @@ ${requirementsList}
         positionName: '',
         matchingScore: 0,
         matchingReason: 'エラーにより分析できませんでした',
+        recommendationReason: 'エラーにより分析できませんでした',
         success: false,
       };
     }
