@@ -241,7 +241,7 @@ export const recruitWorkflow = createWorkflow({
 recruitWorkflow
   .then(checklistStep)
   .then(jobSearchStep)
-  .foreach(jobMatchingStep, { concurrency: 3 }) // 最大5件同時並列実行
+  .foreach(jobMatchingStep, { concurrency: 1 }) // モデルのTPM制限に合わせて設定する
   .then(filterMatchingResults)
   .then(slackNotificationStep)
   .commit();
