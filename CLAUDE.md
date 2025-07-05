@@ -40,10 +40,10 @@
 
 **Mastraフレームワーク統合** (`src/mastra/index.ts`):
 
-- ストレージにLibSQL（ファイルデータベース）を使用した中央設定
+- ストレージにLibSQL（インメモリデータベース）を使用した中央設定
 - 3つのメインエージェントが登録されています：RecruitAgent、ChecklistAgent、JobMatcherAgent
 - 統合ワークフロー：`recruitWorkflow` - 3つのエージェントを連携させる自動化フロー
-- 開発にはインメモリデータベースを使用
+- 全環境でインメモリデータベース（`:memory:`）を使用
 
 **エージェントシステム**:
 
