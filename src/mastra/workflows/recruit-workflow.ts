@@ -1,6 +1,7 @@
 import { createWorkflow, createStep } from '@mastra/core';
 import { z } from 'zod';
 import { randomUUID } from 'crypto';
+import { subDays, fromUnixTime, isAfter } from 'date-fns';
 import { ChecklistAgent } from '../agents/checklist-agent';
 import { JobSearchAgent } from '../agents/job-search-agent';
 import { JobMatcherAgent } from '../agents/job-matcher-agent';
@@ -75,6 +76,29 @@ ${inputData.requirementsList}`,
     logger.info('求人検索結果:', uniqueJobs);
 
     return uniqueJobs;
+  },
+});
+
+const filterRecentJobsStep = createStep({
+  id: 'filter-recent-jobs',
+  inputSchema: z.array(jobSchema),
+  outputSchema: z.array(jobSchema),
+  // eslint-disable-next-line @typescript-eslint/require-await
+  execute: async ({ inputData, mastra }) => {
+    const logger = mastra.getLogger();
+    const filterDays = Number(process.env.JOB_FILTER_DAYS) || 7;
+    const cutoffDate = subDays(new Date(), filterDays);
+
+    const recentJobs = inputData.filter(job => {
+      const jobDate = fromUnixTime(Number(job.updated_at));
+      return isAfter(jobDate, cutoffDate);
+    });
+
+    logger.info(
+      `求人日付フィルタリング結果: ${inputData.length.toString()}件 → ${recentJobs.length.toString()}件 (直近${filterDays.toString()}日以内)`
+    );
+
+    return recentJobs;
   },
 });
 
@@ -222,6 +246,7 @@ export const recruitWorkflow = createWorkflow({
   steps: [
     checklistStep,
     jobSearchStep,
+    filterRecentJobsStep,
     jobMatchingStep,
     filterMatchingResults,
     slackNotificationStep,
@@ -241,6 +266,7 @@ export const recruitWorkflow = createWorkflow({
 recruitWorkflow
   .then(checklistStep)
   .then(jobSearchStep)
+  .then(filterRecentJobsStep)
   .foreach(jobMatchingStep, { concurrency: 1 }) // モデルのTPM制限に合わせて設定する
   .then(filterMatchingResults)
   .then(slackNotificationStep)
