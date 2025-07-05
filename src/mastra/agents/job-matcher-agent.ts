@@ -103,7 +103,7 @@ export const JobMatcherAgent = new Agent({
 - **絶対禁止表現**: 「推定」「思われる」「調整可能」「なので」「だから」等の推測表現
 
 **重要**: 正確性を最優先とし、客観的で一貫した分析を提供してください。記載なし条件は制約なしとして扱い、明示的記載のみで適合度を評価してください。`,
-  model: MODELS.GPT_4O_MINI,
+  model: MODELS.GPT_4_1_MINI,
   memory: new Memory({
     options: {
       lastMessages: 10,
