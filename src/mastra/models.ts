@@ -9,7 +9,5 @@ export const MODELS = {
   GPT_4O: openai('gpt-4o'),
 
   // Gemini モデル
-  FLASH_EXP: google('gemini-2.0-flash-exp'),
-  FLASH_PREVIEW: google('gemini-2.5-flash-preview'),
-  FLASH_PREVIEW_05_20: google('gemini-2.5-flash-preview-05-20'),
+  GEMINI_2_5_FLASH: google('gemini-2.5-flash'),
 } as const;
