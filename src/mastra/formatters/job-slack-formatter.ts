@@ -68,6 +68,7 @@ export const formatJobResultText = (matchingResults: MatchResult[]): string => {
 💰 年収: ${formatSalaryRange(Number(result.salaryMin), Number(result.salaryMax))}
 ${scoreEmoji} マッチ率: ${result.matchingScore.toString()}%
 📝 マッチ理由: ${result.matchingReason}
+💡 おすすめポイント: ${result.recommendationReason}
 👀 詳細: ${result.url || '詳細URLなし'}`;
   });
 
@@ -133,7 +134,7 @@ export const formatJobResultBlocks = (
       type: 'section',
       text: {
         type: 'mrkdwn',
-        text: `📝 *マッチ理由:*\n${result.matchingReason}`,
+        text: `📝 *マッチ理由:*\n${result.matchingReason}\n\n💡 *おすすめポイント:*\n${result.recommendationReason}`,
       },
     };
 
