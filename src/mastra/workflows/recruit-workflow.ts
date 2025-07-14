@@ -23,10 +23,7 @@ const checklistStep = createStep({
     requirementsList: z.string(),
   }),
   execute: async ({ inputData, mastra }) => {
-    const result = await ChecklistAgent.generate(inputData.userRequirements, {
-      threadId: workflowSessionIds.threadId,
-      resourceId: workflowSessionIds.resourceId,
-    });
+    const result = await ChecklistAgent.generate(inputData.userRequirements);
     const logger = mastra.getLogger();
     logger.info('チェックリスト生成結果:', result.text);
     logger.debug('セッションID:', workflowSessionIds);
